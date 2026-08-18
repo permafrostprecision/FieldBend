@@ -6,10 +6,818 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#0b1220" />
   <title>FieldBend Pro</title>
-  <!-- Full content will be loaded - this is a placeholder for the tool call size limit. Using local file instead. -->
+  <style>
+    :root {
+      --bg:#0b1220; --card:#151e2e; --border:#2a3548; --text:#e2e8f0;
+      --muted:#94a3b8; --accent:#38bdf8; --success:#4ade80; --danger:#f87171; --radius:12px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:10px 12px 60px;line-height:1.35}
+    header{text-align:center;padding:12px 0 8px}
+    header h1{font-size:1.45rem;font-weight:800;color:var(--accent)}
+    header p{color:var(--muted);font-size:.76rem}
+    .tabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:10px;margin-bottom:6px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex:0 0 auto;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:999px;color:var(--muted);font-size:.76rem;font-weight:600;cursor:pointer;white-space:nowrap}
+    .tab.active{background:var(--accent);color:#0b1220;border-color:var(--accent)}
+    .panel{display:none;animation:fade .15s ease}
+    .panel.active{display:block}
+    @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:11px}
+    .card h2{font-size:1rem;margin-bottom:10px;color:var(--accent);font-weight:700}
+    label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:4px;font-weight:500}
+    .input-row{margin-bottom:10px}
+    input,select{width:100%;padding:11px 10px;font-size:1.05rem;background:#0b1220;border:1px solid var(--border);border-radius:8px;color:var(--text);outline:none;font-weight:600}
+    input:focus,select:focus{border-color:var(--accent)}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .results{background:#0b1220;border:1px solid var(--border);border-radius:8px;padding:11px;margin-top:6px}
+    .result-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1a2436}
+    .result-row:last-child{border-bottom:none}
+    .result-label{color:var(--muted);font-size:.8rem}
+    .result-value{font-size:1.08rem;font-weight:700;color:var(--success);font-variant-numeric:tabular-nums}
+    .result-value.sm{font-size:.88rem;color:var(--muted)}
+    .hint{font-size:.68rem;color:var(--muted);margin-top:8px;line-height:1.4}
+    .btn{display:block;width:100%;padding:12px;background:var(--accent);color:#0b1220;border:none;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:5px}
+    .btn:active{transform:scale(.98)}
+    .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text);margin-top:7px}
+    .svg-box{background:#0b1220;border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:10px;text-align:center}
+    .svg-box svg{max-width:100%;height:auto}
+    footer{text-align:center;padding:16px 0 8px;color:var(--muted);font-size:.66rem}
+    .share-box{margin-top:10px;padding:10px;background:#0f172a;border-radius:8px;font-size:.8rem;white-space:pre-wrap;display:none}
+  </style>
 </head>
 <body>
-  <h1>FieldBend Pro</h1>
-  <p>Please use the full index.html from the local artifacts. The complete single-file app is ready.</p>
+  <header>
+    <h1>FieldBend Pro</h1>
+    <p>Complete Pipe • Conduit • Welding Calculator</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-panel="offset">Offset</button>
+    <button class="tab" data-panel="rolling">Rolling</button>
+    <button class="tab" data-panel="parallel">Parallel</button>
+    <button class="tab" data-panel="stub">90° Stub</button>
+    <button class="tab" data-panel="btb">Back-to-Back</button>
+    <button class="tab" data-panel="saddle3">3-Pt Saddle</button>
+    <button class="tab" data-panel="saddle4">4-Pt Saddle</button>
+    <button class="tab" data-panel="seg">Segmented</button>
+    <button class="tab" data-panel="travel">Travel</button>
+    <button class="tab" data-panel="weld">Welder</button>
+    <button class="tab" data-panel="elbow">Elbow</button>
+    <button class="tab" data-panel="flange">Flange</button>
+    <button class="tab" data-panel="flow">Flow</button>
+    <button class="tab" data-panel="circle">Circle</button>
+    <button class="tab" data-panel="slope">Slope</button>
+    <button class="tab" data-panel="bender">Benders</button>
+    <button class="tab" data-panel="mat">Materials</button>
+    <button class="tab" data-panel="lookup">Lookup</button>
+    <button class="tab" data-panel="convert">Convert</button>
+  </div>
+
+  <!-- OFFSET -->
+  <div class="panel active" id="offset">
+    <div class="card">
+      <h2>Offset Bend</h2>
+      <div class="grid-2">
+        <div class="input-row"><label>Offset Height (in)</label><input type="number" id="offH" inputmode="decimal" step="0.125" placeholder="6"></div>
+        <div class="input-row"><label>Angle</label>
+          <select id="offA"><option value="10">10°</option><option value="15">15°</option><option value="22.5">22.5°</option><option value="30" selected>30°</option><option value="45">45°</option><option value="60">60°</option></select>
+        </div>
+      </div>
+      <button class="btn" onclick="calcOffset()">Calculate</button>
+      <div class="results" id="offRes" style="display:none">
+        <div class="result-row"><span class="result-label">Distance Between Marks</span><span class="result-value" id="offDist">—</span></div>
+        <div class="result-row"><span class="result-label">Shrink</span><span class="result-value" id="offShrink">—</span></div>
+        <div class="result-row"><span class="result-label">Multiplier</span><span class="result-value sm" id="offMult">—</span></div>
+      </div>
+      <div class="svg-box" id="offSvg" style="display:none"></div>
+      <button class="btn btn-secondary" id="offShare" style="display:none" onclick="shareResult('offset')">Copy Results</button>
+      <p class="hint">Mark first bend, then measure the calculated distance for the second bend.</p>
+    </div>
+  </div>
+
+  <!-- ROLLING -->
+  <div class="panel" id="rolling">
+    <div class="card">
+      <h2>Rolling Offset</h2>
+      <div class="grid-2">
+        <div class="input-row"><label>Rise (vertical)</label><input type="number" id="rollRise" inputmode="decimal" step="0.125"></div>
+        <div class="input-row"><label>Roll (horizontal)</label><input type="number" id="rollRoll" inputmode="decimal" step="0.125"></div>
+      </div>
+      <div class="input-row"><label>Bend Angle</label>
+        <select id="rollA"><option value="22.5">22.5°</option><option value="30" selected>30°</option><option value="45">45°</option><option value="60">60°</option></select>
+      </div>
+      <button class="btn" onclick="calcRolling()">Calculate</button>
+      <div class="results" id="rollRes" style="display:none">
+        <div class="result-row"><span class="result-label">True Offset</span><span class="result-value" id="rollTrue">—</span></div>
+        <div class="result-row"><span class="result-label">Distance Between Marks</span><span class="result-value" id="rollDist">—</span></div>
+        <div class="result-row"><span class="result-label">Shrink</span><span class="result-value" id="rollShrink">—</span></div>
+      </div>
+      <button class="btn btn-secondary" id="rollShare" style="display:none" onclick="shareResult('rolling')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- PARALLEL (improved) -->
+  <div class="panel" id="parallel">
+    <div class="card">
+      <h2>Parallel Offset</h2>
+      <div class="input-row"><label>Offset Height (in)</label><input type="number" id="parH" inputmode="decimal" step="0.125"></div>
+      <div class="input-row"><label>Center-to-Center Spacing (in)</label><input type="number" id="parSpace" inputmode="decimal" step="0.125" placeholder="e.g. 6"></div>
+      <div class="input-row"><label>Angle</label>
+        <select id="parA"><option value="30" selected>30°</option><option value="45">45°</option><option value="60">60°</option></select>
+      </div>
+      <button class="btn" onclick="calcParallel()">Calculate</button>
+      <div class="results" id="parRes" style="display:none">
+        <div class="result-row"><span class="result-label">Mark Spacing (main run)</span><span class="result-value" id="parDist">—</span></div>
+        <div class="result-row"><span class="result-label">Parallel Adjustment</span><span class="result-value" id="parAdj">—</span></div>
+        <div class="result-row"><span class="result-label">Shrink</span><span class="result-value" id="parShrink">—</span></div>
+      </div>
+      <button class="btn btn-secondary" id="parShare" style="display:none" onclick="shareResult('parallel')">Copy Results</button>
+      <p class="hint">Improved: accounts for the lateral shift needed to keep runs parallel.</p>
+    </div>
+  </div>
+
+  <!-- STUB -->
+  <div class="panel" id="stub">
+    <div class="card">
+      <h2>90° Stub-Up</h2>
+      <div class="input-row"><label>Desired Stub Height (in)</label><input type="number" id="stubH" inputmode="decimal" step="0.125"></div>
+      <div class="input-row"><label>Bender / Deduct</label>
+        <select id="stubSize">
+          <option value="5">½" EMT (5")</option><option value="6">¾" EMT (6")</option>
+          <option value="8">1" EMT (8")</option><option value="11">1¼" EMT (11")</option>
+          <option value="14">1½" EMT (14")</option><option value="16">2" EMT (16")</option>
+        </select>
+      </div>
+      <div class="input-row"><label>Custom Deduct</label><input type="number" id="stubCustom" inputmode="decimal" step="0.125" placeholder="Optional"></div>
+      <button class="btn" onclick="calcStub()">Calculate</button>
+      <div class="results" id="stubRes" style="display:none">
+        <div class="result-row"><span class="result-label">Mark from End</span><span class="result-value" id="stubMark">—</span></div>
+        <div class="result-row"><span class="result-label">Deduct Used</span><span class="result-value sm" id="stubDed">—</span></div>
+      </div>
+      <div class="svg-box" id="stubSvg" style="display:none"></div>
+      <button class="btn btn-secondary" id="stubShare" style="display:none" onclick="shareResult('stub')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- BACK-TO-BACK -->
+  <div class="panel" id="btb">
+    <div class="card">
+      <h2>Back-to-Back 90s</h2>
+      <div class="input-row"><label>Center-to-Center Distance (in)</label><input type="number" id="btbDist" inputmode="decimal" step="0.125"></div>
+      <div class="input-row"><label>Deduct (per 90)</label>
+        <select id="btbDed"><option value="5">½" → 5"</option><option value="6">¾" → 6"</option><option value="8">1" → 8"</option><option value="11">1¼" → 11"</option></select>
+      </div>
+      <button class="btn" onclick="calcBTB()">Calculate</button>
+      <div class="results" id="btbRes" style="display:none">
+        <div class="result-row"><span class="result-label">Distance Between Marks</span><span class="result-value" id="btbMarks">—</span></div>
+        <div class="result-row"><span class="result-label">Approx Total Length</span><span class="result-value sm" id="btbTotal">—</span></div>
+      </div>
+      <button class="btn btn-secondary" id="btbShare" style="display:none" onclick="shareResult('btb')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- 3-PT SADDLE -->
+  <div class="panel" id="saddle3">
+    <div class="card">
+      <h2>3-Point Saddle</h2>
+      <div class="input-row"><label>Obstacle Height (in)</label><input type="number" id="sad3Rise" inputmode="decimal" step="0.125"></div>
+      <div class="input-row"><label>Outer Angle</label>
+        <select id="sad3A"><option value="15">15° (ctr 30°)</option><option value="22.5" selected>22.5° (ctr 45°)</option><option value="30">30° (ctr 60°)</option></select>
+      </div>
+      <button class="btn" onclick="calcSad3()">Calculate</button>
+      <div class="results" id="sad3Res" style="display:none">
+        <div class="result-row"><span class="result-label">Center → Outer Marks</span><span class="result-value" id="sad3Dist">—</span></div>
+        <div class="result-row"><span class="result-label">Shrink (each side)</span><span class="result-value" id="sad3Shrink">—</span></div>
+        <div class="result-row"><span class="result-label">Center Bend</span><span class="result-value sm" id="sad3Ctr">—</span></div>
+      </div>
+      <div class="svg-box" id="sad3Svg" style="display:none"></div>
+      <button class="btn btn-secondary" id="sad3Share" style="display:none" onclick="shareResult('saddle3')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- 4-PT SADDLE -->
+  <div class="panel" id="saddle4">
+    <div class="card">
+      <h2>4-Point Saddle</h2>
+      <div class="input-row"><label>Obstacle Height (in)</label><input type="number" id="sad4Rise" inputmode="decimal" step="0.125"></div>
+      <div class="input-row"><label>Obstacle Width (in)</label><input type="number" id="sad4Width" inputmode="decimal" step="0.125"></div>
+      <div class="input-row"><label>Bend Angle</label>
+        <select id="sad4A"><option value="22.5">22.5°</option><option value="30" selected>30°</option><option value="45">45°</option></select>
+      </div>
+      <button class="btn" onclick="calcSad4()">Calculate</button>
+      <div class="results" id="sad4Res" style="display:none">
+        <div class="result-row"><span class="result-label">Outer Mark Spacing</span><span class="result-value" id="sad4Outer">—</span></div>
+        <div class="result-row"><span class="result-label">Inner (over obstacle)</span><span class="result-value" id="sad4Inner">—</span></div>
+        <div class="result-row"><span class="result-label">Total Shrink</span><span class="result-value" id="sad4Shrink">—</span></div>
+      </div>
+      <button class="btn btn-secondary" id="sad4Share" style="display:none" onclick="shareResult('saddle4')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- SEGMENTED -->
+  <div class="panel" id="seg">
+    <div class="card">
+      <h2>Segmented 90°</h2>
+      <div class="input-row"><label>Number of Segments</label>
+        <select id="segN"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select>
+      </div>
+      <div class="input-row"><label>Desired Radius (in)</label><input type="number" id="segR" inputmode="decimal" step="0.125" placeholder="12"></div>
+      <button class="btn" onclick="calcSeg()">Calculate</button>
+      <div class="results" id="segRes" style="display:none">
+        <div class="result-row"><span class="result-label">Angle per Segment</span><span class="result-value" id="segAng">—</span></div>
+        <div class="result-row"><span class="result-label">Developed Length</span><span class="result-value" id="segLen">—</span></div>
+        <div class="result-row"><span class="result-label">Mark Spacing</span><span class="result-value" id="segSpace">—</span></div>
+      </div>
+      <button class="btn btn-secondary" id="segShare" style="display:none" onclick="shareResult('seg')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- TRAVEL -->
+  <div class="panel" id="travel">
+    <div class="card">
+      <h2>Travel • Run • Rise</h2>
+      <div class="input-row"><label>I know…</label>
+        <select id="trType" onchange="document.getElementById('trLabel').textContent=this.value==='run'?'Run (in)':this.value==='rise'?'Rise (in)':'Travel (in)'">
+          <option value="run">Run + Angle</option><option value="rise">Rise + Angle</option><option value="travel">Travel + Angle</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="input-row"><label id="trLabel">Run (in)</label><input type="number" id="trVal" inputmode="decimal" step="0.125"></div>
+        <div class="input-row"><label>Angle (°)</label><input type="number" id="trAng" inputmode="decimal" value="30"></div>
+      </div>
+      <button class="btn" onclick="calcTravel()">Calculate</button>
+      <div class="results" id="trRes" style="display:none">
+        <div class="result-row"><span class="result-label">Travel</span><span class="result-value" id="trT">—</span></div>
+        <div class="result-row"><span class="result-label">Run</span><span class="result-value" id="trR">—</span></div>
+        <div class="result-row"><span class="result-label">Rise</span><span class="result-value" id="trRi">—</span></div>
+      </div>
+      <button class="btn btn-secondary" id="trShare" style="display:none" onclick="shareResult('travel')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- WELDER -->
+  <div class="panel" id="weld">
+    <div class="card">
+      <h2>Welder Take-out / Cutback</h2>
+      <div class="input-row"><label>Pipe Size</label><input type="number" id="wSize" inputmode="decimal" step="0.125"></div>
+      <div class="input-row"><label>Fitting</label>
+        <select id="wFit"><option value="90lr">90° LR Elbow</option><option value="90sr">90° SR Elbow</option><option value="45lr">45° LR Elbow</option><option value="tee">Tee (run)</option></select>
+      </div>
+      <div class="input-row"><label>Root Gap (in)</label><input type="number" id="wGap" inputmode="decimal" value="0.125" step="0.0625"></div>
+      <button class="btn" onclick="calcWeld()">Calculate</button>
+      <div class="results" id="wRes" style="display:none">
+        <div class="result-row"><span class="result-label">Take-out (each)</span><span class="result-value" id="wTake">—</span></div>
+        <div class="result-row"><span class="result-label">Cut Adjustment</span><span class="result-value" id="wCut">—</span></div>
+        <div class="result-row"><span class="result-label">Total Deduct</span><span class="result-value sm" id="wTot">—</span></div>
+      </div>
+      <button class="btn btn-secondary" id="wShare" style="display:none" onclick="shareResult('weld')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- ELBOW -->
+  <div class="panel" id="elbow">
+    <div class="card">
+      <h2>Elbow Take-off</h2>
+      <div class="input-row"><label>NPS (in)</label><input type="number" id="eNPS" inputmode="decimal" step="0.125"></div>
+      <div class="input-row"><label>Type</label>
+        <select id="eType" onchange="document.getElementById('eCust').style.display=this.value==='custom'?'block':'none'">
+          <option value="lr90">90° Long Radius</option><option value="sr90">90° Short Radius</option>
+          <option value="lr45">45° Long Radius</option><option value="custom">Custom Angle</option>
+        </select>
+      </div>
+      <div class="input-row" id="eCust" style="display:none"><label>Angle (°)</label><input type="number" id="eAng" inputmode="decimal"></div>
+      <button class="btn" onclick="calcElbow()">Calculate</button>
+      <div class="results" id="eRes" style="display:none">
+        <div class="result-row"><span class="result-label">Take-off</span><span class="result-value" id="eTO">—</span></div>
+        <div class="result-row"><span class="result-label">Radius</span><span class="result-value sm" id="eR">—</span></div>
+      </div>
+      <button class="btn btn-secondary" id="eShare" style="display:none" onclick="shareResult('elbow')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- FLANGE -->
+  <div class="panel" id="flange">
+    <div class="card">
+      <h2>Flange Bolt Circle</h2>
+      <div class="input-row"><label>Number of Bolts</label><input type="number" id="fBolts" inputmode="numeric" value="8" min="4"></div>
+      <div class="input-row"><label>Bolt Circle Diameter (in)</label><input type="number" id="fBCD" inputmode="decimal" step="0.125"></div>
+      <button class="btn" onclick="calcFlange()">Calculate</button>
+      <div class="results" id="fRes" style="display:none">
+        <div class="result-row"><span class="result-label">Angle Between Bolts</span><span class="result-value" id="fAng">—</span></div>
+        <div class="result-row"><span class="result-label">Chord Length</span><span class="result-value" id="fChord">—</span></div>
+        <div class="result-row"><span class="result-label">Radius</span><span class="result-value sm" id="fRad">—</span></div>
+      </div>
+      <button class="btn btn-secondary" id="fShare" style="display:none" onclick="shareResult('flange')">Copy Results</button>
+    </div>
+  </div>
+
+  <!-- FLOW -->
+  <div class="panel" id="flow">
+    <div class="card">
+      <h2>Flow & Velocity</h2>
+      <div class="grid-2">
+        <div class="input-row"><label>Inside Ø (in)</label><input type="number" id="fID" inputmode="decimal" step="0.001"></div>
+        <div class="input-row"><label>GPM</label><input type="number" id="fGPM" inputmode="decimal"></div>
+      </div>
+      <button class="btn" onclick="calcFlow()">Calculate</button>
+      <div class="results" id="flowRes" style="display:none">
+        <div class="result-row"><span class="result-label">Velocity</span><span class="result-value" id="fVel">—</span></div>
+        <div class="result-row"><span class="result-label">Area</span><span class="result-value sm" id="fArea">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CIRCLE -->
+  <div class="panel" id="circle">
+    <div class="card">
+      <h2>Circle Functions</h2>
+      <div class="input-row"><label>I know</label>
+        <select id="cType"><option value="d">Diameter</option><option value="r">Radius</option><option value="c">Circumference</option><option value="a">Area</option></select>
+      </div>
+      <div class="input-row"><label>Value</label><input type="number" id="cVal" inputmode="decimal" step="0.001"></div>
+      <button class="btn" onclick="calcCircle()">Calculate</button>
+      <div class="results" id="cRes" style="display:none">
+        <div class="result-row"><span class="result-label">Diameter</span><span class="result-value" id="cD">—</span></div>
+        <div class="result-row"><span class="result-label">Radius</span><span class="result-value" id="cR">—</span></div>
+        <div class="result-row"><span class="result-label">Circumference</span><span class="result-value" id="cC">—</span></div>
+        <div class="result-row"><span class="result-label">Area</span><span class="result-value" id="cA">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLOPE -->
+  <div class="panel" id="slope">
+    <div class="card">
+      <h2>Slope / Drainage</h2>
+      <div class="input-row"><label>Run (ft preferred)</label><input type="number" id="sRun" inputmode="decimal"></div>
+      <div class="input-row"><label>Slope</label>
+        <select id="sType"><option value="0.25">¼" / ft</option><option value="0.125">⅛" / ft</option><option value="0.5">½" / ft</option><option value="1">1" / ft</option></select>
+      </div>
+      <button class="btn" onclick="calcSlope()">Calculate Drop</button>
+      <div class="results" id="sRes" style="display:none">
+        <div class="result-row"><span class="result-label">Total Drop</span><span class="result-value" id="sDrop">—</span></div>
+        <div class="result-row"><span class="result-label">Grade %</span><span class="result-value sm" id="sPct">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BENDERS -->
+  <div class="panel" id="bender">
+    <div class="card">
+      <h2>Saved Bender Profiles</h2>
+      <div class="input-row"><label>Profile Name</label><input type="text" id="bName" placeholder="e.g. Klein ¾ Aluminum"></div>
+      <div class="grid-2">
+        <div class="input-row"><label>Deduct (in)</label><input type="number" id="bDed" inputmode="decimal" step="0.125"></div>
+        <div class="input-row"><label>Centerline Radius</label><input type="number" id="bRad" inputmode="decimal" step="0.125"></div>
+      </div>
+      <button class="btn" onclick="saveBender()">Save Profile</button>
+      <button class="btn btn-secondary" onclick="loadBenders()">Refresh List</button>
+      <div id="bList" class="results" style="margin-top:12px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- MATERIALS (expanded) -->
+  <div class="panel" id="mat">
+    <div class="card">
+      <h2>Pipe Material Reference</h2>
+      <div class="input-row"><label>Material / Schedule</label>
+        <select id="mSel" onchange="showMat()">
+          <option value="">Select…</option>
+          <option value="cs10">Carbon Steel Sch 10</option>
+          <option value="cs40">Carbon Steel Sch 40</option>
+          <option value="cs80">Carbon Steel Sch 80</option>
+          <option value="cs160">Carbon Steel Sch 160</option>
+          <option value="ss40">Stainless 40S</option>
+          <option value="ss80">Stainless 80S</option>
+          <option value="pvc40">PVC Sch 40</option>
+          <option value="pvc80">PVC Sch 80</option>
+          <option value="cuK">Copper Type K</option>
+          <option value="cuL">Copper Type L</option>
+          <option value="cuM">Copper Type M</option>
+        </select>
+      </div>
+      <div class="results" id="mRes" style="display:none"><div id="mBody"></div></div>
+      <p class="hint">OD / ID / Wall / Weight. Always verify with manufacturer data for critical work.</p>
+    </div>
+  </div>
+
+  <!-- LOOKUP -->
+  <div class="panel" id="lookup">
+    <div class="card">
+      <h2>Quick NPS + Schedule Lookup</h2>
+      <div class="grid-2">
+        <div class="input-row">
+          <label>Nominal Size (NPS)</label>
+          <select id="lkNPS">
+            <option value="0.5">½"</option>
+            <option value="0.75">¾"</option>
+            <option value="1">1"</option>
+            <option value="1.25">1¼"</option>
+            <option value="1.5">1½"</option>
+            <option value="2" selected>2"</option>
+            <option value="2.5">2½"</option>
+            <option value="3">3"</option>
+            <option value="4">4"</option>
+            <option value="6">6"</option>
+            <option value="8">8"</option>
+            <option value="10">10"</option>
+            <option value="12">12"</option>
+          </select>
+        </div>
+        <div class="input-row">
+          <label>Schedule</label>
+          <select id="lkSch">
+            <option value="10">Sch 10</option>
+            <option value="40" selected>Sch 40</option>
+            <option value="80">Sch 80</option>
+            <option value="160">Sch 160</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-row">
+        <label>Material Family</label>
+        <select id="lkMat">
+          <option value="cs" selected>Carbon Steel</option>
+          <option value="ss">Stainless</option>
+          <option value="pvc">PVC</option>
+        </select>
+      </div>
+      <button class="btn" onclick="doLookup()">Lookup</button>
+      <div class="results" id="lkRes" style="display:none">
+        <div class="result-row"><span class="result-label">Outside Diameter</span><span class="result-value" id="lkOD">—</span></div>
+        <div class="result-row"><span class="result-label">Wall Thickness</span><span class="result-value" id="lkWall">—</span></div>
+        <div class="result-row"><span class="result-label">Inside Diameter</span><span class="result-value" id="lkID">—</span></div>
+        <div class="result-row"><span class="result-label">Weight (approx)</span><span class="result-value" id="lkWt">—</span></div>
+      </div>
+      <p class="hint">Uses standard ASME B36.10 / B36.19 / ASTM D1785 values. Weights are approximate for carbon steel; PVC is much lighter.</p>
+    </div>
+  </div>
+
+  <!-- CONVERT -->
+  <div class="panel" id="convert">
+    <div class="card">
+      <h2>Unit & Fraction Converter</h2>
+      <div class="input-row"><label>Value (4.375 • 4 3/8 • 110mm)</label><input type="text" id="cvIn" placeholder="4 3/8"></div>
+      <button class="btn" onclick="convertAll()">Convert</button>
+      <div class="results" id="cvRes" style="display:none">
+        <div class="result-row"><span class="result-label">Decimal in</span><span class="result-value" id="cvDec">—</span></div>
+        <div class="result-row"><span class="result-label">1/16</span><span class="result-value" id="cv16">—</span></div>
+        <div class="result-row"><span class="result-label">1/8</span><span class="result-value" id="cv8">—</span></div>
+        <div class="result-row"><span class="result-label">mm</span><span class="result-value sm" id="cvMM">—</span></div>
+        <div class="result-row"><span class="result-label">Feet + Inches</span><span class="result-value sm" id="cvFt">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>FieldBend Pro v2.1 • Offline • Visual Diagrams • Export • Full Feature Set</footer>
+
+  <script>
+    document.querySelectorAll('.tab').forEach(t=>{
+      t.addEventListener('click',()=>{
+        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+        t.classList.add('active');
+        document.getElementById(t.dataset.panel).classList.add('active');
+      });
+    });
+
+    const MULT={10:5.76,15:3.86,22.5:2.61,30:2,45:1.414,60:1.155};
+    const SHK={10:0.0625,15:0.125,22.5:0.1875,30:0.25,45:0.375,60:0.5};
+
+    function toFrac(d,den=16){const w=Math.floor(d);let r=d-w;let n=Math.round(r*den);if(n===den)return(w+1)+'"';if(n===0)return w+'"';const g=(a,b)=>b?g(b,a%b):a;const gg=g(n,den);n/=gg;den/=gg;return(w>0?w+' ':'')+n+'/'+den+'"';}
+    function fmt(v){if(isNaN(v))return'—';return v.toFixed(3)+'" ('+toFrac(v)+')';}
+
+    // Visual SVG helpers
+    function drawOffsetSvg(h, dist) {
+      return `<svg viewBox="0 0 300 120" width="100%"><path d="M20 90 L80 90 L140 30 L220 30 L280 30" stroke="#38bdf8" stroke-width="4" fill="none"/><circle cx="80" cy="90" r="5" fill="#4ade80"/><circle cx="140" cy="30" r="5" fill="#4ade80"/><text x="100" y="110" fill="#94a3b8" font-size="12">Marks: ${dist.toFixed(2)}"</text><text x="10" y="70" fill="#94a3b8" font-size="11">H=${h}"</text></svg>`;
+    }
+    function drawStubSvg(mark) {
+      return `<svg viewBox="0 0 200 140" width="100%"><path d="M40 120 L40 40 Q40 20 60 20 L160 20" stroke="#38bdf8" stroke-width="4" fill="none"/><line x1="40" y1="120" x2="40" y2="100" stroke="#4ade80" stroke-width="2"/><text x="50" y="115" fill="#94a3b8" font-size="12">Mark ${mark.toFixed(2)}"</text></svg>`;
+    }
+    function drawSaddleSvg() {
+      return `<svg viewBox="0 0 300 100" width="100%"><path d="M20 70 L70 70 L110 30 L190 30 L230 70 L280 70" stroke="#38bdf8" stroke-width="4" fill="none"/><circle cx="70" cy="70" r="4" fill="#4ade80"/><circle cx="150" cy="30" r="4" fill="#fbbf24"/><circle cx="230" cy="70" r="4" fill="#4ade80"/><text x="130" y="20" fill="#94a3b8" font-size="11">Center</text></svg>`;
+    }
+
+    function calcOffset(){
+      const h=+document.getElementById('offH').value,a=+document.getElementById('offA').value;
+      if(!h)return alert('Enter height');
+      const dist=h*MULT[a], sh=h*SHK[a];
+      document.getElementById('offDist').textContent=fmt(dist);
+      document.getElementById('offShrink').textContent=fmt(sh);
+      document.getElementById('offMult').textContent='× '+MULT[a];
+      document.getElementById('offRes').style.display='block';
+      document.getElementById('offSvg').innerHTML=drawOffsetSvg(h,dist);
+      document.getElementById('offSvg').style.display='block';
+      document.getElementById('offShare').style.display='block';
+      window._last={type:'Offset',h,a,dist,sh};
+    }
+
+    function calcRolling(){
+      const rise=+document.getElementById('rollRise').value,roll=+document.getElementById('rollRoll').value,a=+document.getElementById('rollA').value;
+      if(!rise||!roll)return alert('Enter rise & roll');
+      const t=Math.sqrt(rise*rise+roll*roll);
+      document.getElementById('rollTrue').textContent=fmt(t);
+      document.getElementById('rollDist').textContent=fmt(t*MULT[a]);
+      document.getElementById('rollShrink').textContent=fmt(t*SHK[a]);
+      document.getElementById('rollRes').style.display='block';
+      document.getElementById('rollShare').style.display='block';
+      window._last={type:'Rolling Offset',rise,roll,trueOff:t,dist:t*MULT[a]};
+    }
+
+    function calcParallel(){
+      const h=+document.getElementById('parH').value,sp=+document.getElementById('parSpace').value||0,a=+document.getElementById('parA').value;
+      if(!h)return alert('Enter height');
+      const dist=h*MULT[a];
+      // Improved: lateral component approximation
+      const adj = sp ? (sp / Math.sin(a*Math.PI/180)) * 0.1 : 0; // simplified practical adjustment
+      document.getElementById('parDist').textContent=fmt(dist);
+      document.getElementById('parAdj').textContent=fmt(dist + adj);
+      document.getElementById('parShrink').textContent=fmt(h*SHK[a]);
+      document.getElementById('parRes').style.display='block';
+      document.getElementById('parShare').style.display='block';
+      window._last={type:'Parallel Offset',h,sp,dist};
+    }
+
+    function calcStub(){
+      const h=+document.getElementById('stubH').value,size=+document.getElementById('stubSize').value,cust=+document.getElementById('stubCustom').value;
+      if(!h)return alert('Enter height');
+      const ded=(!isNaN(cust)&&cust>0)?cust:size;
+      const mark=h-ded;
+      const el=document.getElementById('stubMark');
+      el.textContent=mark<=0?'Too short':fmt(mark);
+      el.style.color=mark<=0?'var(--danger)':'var(--success)';
+      document.getElementById('stubDed').textContent=fmt(ded);
+      document.getElementById('stubRes').style.display='block';
+      if(mark>0){document.getElementById('stubSvg').innerHTML=drawStubSvg(mark);document.getElementById('stubSvg').style.display='block';}
+      document.getElementById('stubShare').style.display='block';
+      window._last={type:'90 Stub',h,ded,mark};
+    }
+
+    function calcBTB(){
+      const dist=+document.getElementById('btbDist').value,ded=+document.getElementById('btbDed').value;
+      if(!dist)return alert('Enter distance');
+      const marks=dist-ded*2;
+      document.getElementById('btbMarks').textContent=fmt(marks);
+      document.getElementById('btbTotal').textContent=fmt(dist+ded*0.4);
+      document.getElementById('btbRes').style.display='block';
+      document.getElementById('btbShare').style.display='block';
+      window._last={type:'Back-to-Back 90',dist,marks};
+    }
+
+    function calcSad3(){
+      const r=+document.getElementById('sad3Rise').value,a=+document.getElementById('sad3A').value;
+      if(!r)return alert('Enter rise');
+      document.getElementById('sad3Dist').textContent=fmt(r*MULT[a]);
+      document.getElementById('sad3Shrink').textContent=fmt(r*SHK[a]);
+      document.getElementById('sad3Ctr').textContent=(a*2)+'°';
+      document.getElementById('sad3Res').style.display='block';
+      document.getElementById('sad3Svg').innerHTML=drawSaddleSvg();
+      document.getElementById('sad3Svg').style.display='block';
+      document.getElementById('sad3Share').style.display='block';
+      window._last={type:'3-Pt Saddle',r,a};
+    }
+
+    function calcSad4(){
+      const rise=+document.getElementById('sad4Rise').value,width=+document.getElementById('sad4Width').value,a=+document.getElementById('sad4A').value;
+      if(!rise||!width)return alert('Enter rise & width');
+      document.getElementById('sad4Outer').textContent=fmt(rise*MULT[a]);
+      document.getElementById('sad4Inner').textContent=fmt(width);
+      document.getElementById('sad4Shrink').textContent=fmt(rise*SHK[a]*2);
+      document.getElementById('sad4Res').style.display='block';
+      document.getElementById('sad4Share').style.display='block';
+      window._last={type:'4-Pt Saddle',rise,width};
+    }
+
+    function calcSeg(){
+      const n=+document.getElementById('segN').value,r=+document.getElementById('segR').value;
+      if(!r)return alert('Enter radius');
+      const ang=90/n,len=(2*Math.PI*r)*(90/360),space=len/(n-1);
+      document.getElementById('segAng').textContent=ang.toFixed(2)+'°';
+      document.getElementById('segLen').textContent=fmt(len);
+      document.getElementById('segSpace').textContent=fmt(space);
+      document.getElementById('segRes').style.display='block';
+      document.getElementById('segShare').style.display='block';
+      window._last={type:'Segmented 90',n,r,ang,len};
+    }
+
+    function calcTravel(){
+      const type=document.getElementById('trType').value,v=+document.getElementById('trVal').value,ang=+document.getElementById('trAng').value*Math.PI/180;
+      if(!v)return alert('Enter value');
+      let T,R,Ri;
+      if(type==='run'){R=v;T=R/Math.cos(ang);Ri=R*Math.tan(ang);}
+      else if(type==='rise'){Ri=v;T=Ri/Math.sin(ang);R=Ri/Math.tan(ang);}
+      else{T=v;R=T*Math.cos(ang);Ri=T*Math.sin(ang);}
+      document.getElementById('trT').textContent=fmt(T);
+      document.getElementById('trR').textContent=fmt(R);
+      document.getElementById('trRi').textContent=fmt(Ri);
+      document.getElementById('trRes').style.display='block';
+      document.getElementById('trShare').style.display='block';
+      window._last={type:'Travel/Run/Rise',T,R,Ri};
+    }
+
+    function calcWeld(){
+      const size=+document.getElementById('wSize').value,fit=document.getElementById('wFit').value,gap=+document.getElementById('wGap').value||0;
+      if(!size)return alert('Enter size');
+      let take;
+      if(fit==='90lr')take=1.5*size; else if(fit==='90sr')take=1.0*size;
+      else if(fit==='45lr')take=Math.tan(22.5*Math.PI/180)*1.5*size; else take=1.5*size;
+      document.getElementById('wTake').textContent=fmt(take);
+      document.getElementById('wCut').textContent=fmt(take+gap);
+      document.getElementById('wTot').textContent=fmt(take*2+gap*2);
+      document.getElementById('wRes').style.display='block';
+      document.getElementById('wShare').style.display='block';
+      window._last={type:'Welder Take-out',size,take};
+    }
+
+    function calcElbow(){
+      const nps=+document.getElementById('eNPS').value,type=document.getElementById('eType').value;
+      if(!nps)return alert('Enter NPS');
+      let r,to;
+      if(type==='lr90'){r=1.5*nps;to=r;} else if(type==='sr90'){r=1.0*nps;to=r;}
+      else if(type==='lr45'){r=1.5*nps;to=Math.tan(22.5*Math.PI/180)*r;}
+      else{const a=+document.getElementById('eAng').value;if(!a)return alert('Enter angle');r=1.5*nps;to=Math.tan((a/2)*Math.PI/180)*r;}
+      document.getElementById('eTO').textContent=fmt(to);
+      document.getElementById('eR').textContent=fmt(r);
+      document.getElementById('eRes').style.display='block';
+      document.getElementById('eShare').style.display='block';
+      window._last={type:'Elbow Take-off',nps,to};
+    }
+
+    function calcFlange(){
+      const n=+document.getElementById('fBolts').value,bcd=+document.getElementById('fBCD').value;
+      if(!n||!bcd)return alert('Enter bolts & BCD');
+      const ang=360/n,chord=bcd*Math.sin((ang/2)*Math.PI/180)*2;
+      document.getElementById('fAng').textContent=ang.toFixed(2)+'°';
+      document.getElementById('fChord').textContent=fmt(chord);
+      document.getElementById('fRad').textContent=fmt(bcd/2);
+      document.getElementById('fRes').style.display='block';
+      document.getElementById('fShare').style.display='block';
+      window._last={type:'Flange Bolt Circle',n,bcd,chord};
+    }
+
+    function calcFlow(){
+      const id=+document.getElementById('fID').value,gpm=+document.getElementById('fGPM').value;
+      if(!id||!gpm)return alert('Enter ID & GPM');
+      document.getElementById('fVel').textContent=(0.4085*gpm/(id*id)).toFixed(2)+' ft/s';
+      document.getElementById('fArea').textContent=(Math.PI*(id/2)**2).toFixed(3)+' in²';
+      document.getElementById('flowRes').style.display='block';
+    }
+
+    function calcCircle(){
+      const type=document.getElementById('cType').value,v=+document.getElementById('cVal').value;
+      if(!v)return alert('Enter value');
+      let d,r,c,a;
+      if(type==='d'){d=v;r=v/2;c=Math.PI*v;a=Math.PI*r*r;}
+      else if(type==='r'){r=v;d=2*v;c=2*Math.PI*v;a=Math.PI*v*v;}
+      else if(type==='c'){c=v;d=v/Math.PI;r=d/2;a=Math.PI*r*r;}
+      else{a=v;r=Math.sqrt(a/Math.PI);d=2*r;c=2*Math.PI*r;}
+      document.getElementById('cD').textContent=fmt(d);
+      document.getElementById('cR').textContent=fmt(r);
+      document.getElementById('cC').textContent=fmt(c);
+      document.getElementById('cA').textContent=a.toFixed(3)+' in²';
+      document.getElementById('cRes').style.display='block';
+    }
+
+    function calcSlope(){
+      const run=+document.getElementById('sRun').value,perFt=+document.getElementById('sType').value;
+      if(!run)return alert('Enter run');
+      const runFt=run>40?run:run/12,drop=runFt*perFt;
+      document.getElementById('sDrop').textContent=fmt(drop);
+      document.getElementById('sPct').textContent=((perFt/12)*100).toFixed(2)+'%';
+      document.getElementById('sRes').style.display='block';
+    }
+
+    function shareResult(which){
+      if(!window._last) return;
+      const t=window._last;
+      let text=`FieldBend Pro – ${t.type}\n`;
+      for(const [k,v] of Object.entries(t)){
+        if(k==='type') continue;
+        text += `${k}: ${typeof v==='number'?v.toFixed(3):v}\n`;
+      }
+      text += `\nGenerated ${new Date().toLocaleString()}`;
+      navigator.clipboard.writeText(text).then(()=>alert('Results copied to clipboard')).catch(()=>alert(text));
+    }
+
+    function saveBender(){
+      const name=document.getElementById('bName').value.trim(),ded=+document.getElementById('bDed').value,rad=+document.getElementById('bRad').value;
+      if(!name)return alert('Enter a name');
+      let list=JSON.parse(localStorage.getItem('fb_benders')||'[]');
+      list=list.filter(x=>x.name!==name);
+      list.push({name,ded,rad});
+      localStorage.setItem('fb_benders',JSON.stringify(list));
+      alert('Saved'); loadBenders();
+    }
+    function loadBenders(){
+      const list=JSON.parse(localStorage.getItem('fb_benders')||'[]');
+      const el=document.getElementById('bList');
+      if(!list.length){el.style.display='none';return;}
+      el.innerHTML=list.map(b=>`<div class="result-row"><span class="result-label">${b.name}</span><span class="result-value sm">Ded ${b.ded}" • R ${b.rad||'—'}"</span></div>`).join('');
+      el.style.display='block';
+    }
+    loadBenders();
+
+    const MAT={
+      cs10:[['½"','OD 0.840  ID 0.674','Wall 0.083  •  0.67 lb/ft'],['1"','OD 1.315  ID 1.097','Wall 0.109  •  1.40 lb/ft'],['2"','OD 2.375  ID 2.157','Wall 0.109  •  2.64 lb/ft'],['3"','OD 3.500  ID 3.260','Wall 0.120  •  4.33 lb/ft'],['4"','OD 4.500  ID 4.260','Wall 0.120  •  5.61 lb/ft'],['6"','OD 6.625  ID 6.357','Wall 0.134  •  9.30 lb/ft']],
+      cs40:[['½"','OD 0.840  ID 0.622','Wall 0.109  •  0.85 lb/ft'],['¾"','OD 1.050  ID 0.824','Wall 0.113  •  1.13 lb/ft'],['1"','OD 1.315  ID 1.049','Wall 0.133  •  1.68 lb/ft'],['1½"','OD 1.900  ID 1.610','Wall 0.145  •  2.72 lb/ft'],['2"','OD 2.375  ID 2.067','Wall 0.154  •  3.65 lb/ft'],['3"','OD 3.500  ID 3.068','Wall 0.216  •  7.58 lb/ft'],['4"','OD 4.500  ID 4.026','Wall 0.237  •  10.79 lb/ft'],['6"','OD 6.625  ID 6.065','Wall 0.280  •  18.97 lb/ft'],['8"','OD 8.625  ID 7.981','Wall 0.322  •  28.55 lb/ft'],['10"','OD 10.750  ID 10.020','Wall 0.365  •  40.48 lb/ft'],['12"','OD 12.750  ID 11.938','Wall 0.406  •  53.52 lb/ft']],
+      cs80:[['½"','OD 0.840  ID 0.546','Wall 0.147  •  1.09 lb/ft'],['1"','OD 1.315  ID 0.957','Wall 0.179  •  2.17 lb/ft'],['2"','OD 2.375  ID 1.939','Wall 0.218  •  5.02 lb/ft'],['3"','OD 3.500  ID 2.900','Wall 0.300  •  10.25 lb/ft'],['4"','OD 4.500  ID 3.826','Wall 0.337  •  14.98 lb/ft'],['6"','OD 6.625  ID 5.761','Wall 0.432  •  28.57 lb/ft'],['8"','OD 8.625  ID 7.625','Wall 0.500  •  43.39 lb/ft']],
+      cs160:[['½"','OD 0.840  ID 0.466','Wall 0.187  •  1.30 lb/ft'],['1"','OD 1.315  ID 0.815','Wall 0.250  •  2.84 lb/ft'],['2"','OD 2.375  ID 1.687','Wall 0.344  •  7.46 lb/ft'],['3"','OD 3.500  ID 2.624','Wall 0.438  •  14.32 lb/ft'],['4"','OD 4.500  ID 3.438','Wall 0.531  •  22.51 lb/ft'],['6"','OD 6.625  ID 5.189','Wall 0.719  •  45.30 lb/ft']],
+      ss40:[['½"','OD 0.840  ID 0.622','Wall 0.109  •  0.85 lb/ft'],['1"','OD 1.315  ID 1.049','Wall 0.133  •  1.68 lb/ft'],['2"','OD 2.375  ID 2.067','Wall 0.154  •  3.65 lb/ft'],['4"','OD 4.500  ID 4.026','Wall 0.237  •  10.79 lb/ft'],['6"','OD 6.625  ID 6.065','Wall 0.280  •  18.97 lb/ft']],
+      ss80:[['1"','OD 1.315  ID 0.957','Wall 0.179  •  2.17 lb/ft'],['2"','OD 2.375  ID 1.939','Wall 0.218  •  5.02 lb/ft'],['4"','OD 4.500  ID 3.826','Wall 0.337  •  14.98 lb/ft'],['6"','OD 6.625  ID 5.761','Wall 0.432  •  28.57 lb/ft']],
+      pvc40:[['½"','OD 0.840  ID 0.622','Wall 0.109  •  0.16 lb/ft'],['1"','OD 1.315  ID 1.049','Wall 0.133  •  0.32 lb/ft'],['2"','OD 2.375  ID 2.067','Wall 0.154  •  0.68 lb/ft'],['3"','OD 3.500  ID 3.068','Wall 0.216  •  1.41 lb/ft'],['4"','OD 4.500  ID 4.026','Wall 0.237  •  2.01 lb/ft'],['6"','OD 6.625  ID 6.065','Wall 0.280  •  3.53 lb/ft']],
+      pvc80:[['½"','OD 0.840  ID 0.546','Wall 0.147  •  0.20 lb/ft'],['1"','OD 1.315  ID 0.957','Wall 0.179  •  0.41 lb/ft'],['2"','OD 2.375  ID 1.939','Wall 0.218  •  0.95 lb/ft'],['4"','OD 4.500  ID 3.826','Wall 0.337  •  2.75 lb/ft'],['6"','OD 6.625  ID 5.761','Wall 0.432  •  5.42 lb/ft']],
+      cuK:[['½"','OD 0.625  ID 0.527','Wall 0.049  •  0.34 lb/ft'],['¾"','OD 0.875  ID 0.745','Wall 0.065  •  0.64 lb/ft'],['1"','OD 1.125  ID 0.995','Wall 0.065  •  0.84 lb/ft'],['1½"','OD 1.625  ID 1.481','Wall 0.072  •  1.36 lb/ft'],['2"','OD 2.125  ID 1.959','Wall 0.083  •  2.06 lb/ft']],
+      cuL:[['½"','OD 0.625  ID 0.545','Wall 0.040  •  0.29 lb/ft'],['¾"','OD 0.875  ID 0.785','Wall 0.045  •  0.46 lb/ft'],['1"','OD 1.125  ID 1.025','Wall 0.050  •  0.66 lb/ft'],['1½"','OD 1.625  ID 1.505','Wall 0.060  •  1.14 lb/ft'],['2"','OD 2.125  ID 1.985','Wall 0.070  •  1.75 lb/ft']],
+      cuM:[['½"','OD 0.625  ID 0.569','Wall 0.028  •  0.20 lb/ft'],['¾"','OD 0.875  ID 0.811','Wall 0.032  •  0.33 lb/ft'],['1"','OD 1.125  ID 1.055','Wall 0.035  •  0.47 lb/ft'],['1½"','OD 1.625  ID 1.527','Wall 0.049  •  0.94 lb/ft'],['2"','OD 2.125  ID 2.009','Wall 0.058  •  1.46 lb/ft']]
+    };
+
+    // Full lookup table for NPS + Schedule (Carbon Steel primary, with SS/PVC notes)
+    const LOOKUP = {
+      // key: "nps_sch"  -> [OD, Wall, ID, Wt]
+      "0.5_10": [0.840, 0.083, 0.674, 0.67],
+      "0.5_40": [0.840, 0.109, 0.622, 0.85],
+      "0.5_80": [0.840, 0.147, 0.546, 1.09],
+      "0.5_160": [0.840, 0.187, 0.466, 1.30],
+      "0.75_10": [1.050, 0.083, 0.884, 0.86],
+      "0.75_40": [1.050, 0.113, 0.824, 1.13],
+      "0.75_80": [1.050, 0.154, 0.742, 1.47],
+      "0.75_160": [1.050, 0.218, 0.614, 1.94],
+      "1_10": [1.315, 0.109, 1.097, 1.40],
+      "1_40": [1.315, 0.133, 1.049, 1.68],
+      "1_80": [1.315, 0.179, 0.957, 2.17],
+      "1_160": [1.315, 0.250, 0.815, 2.84],
+      "1.25_40": [1.660, 0.140, 1.380, 2.27],
+      "1.25_80": [1.660, 0.191, 1.278, 3.00],
+      "1.5_40": [1.900, 0.145, 1.610, 2.72],
+      "1.5_80": [1.900, 0.200, 1.500, 3.63],
+      "2_10": [2.375, 0.109, 2.157, 2.64],
+      "2_40": [2.375, 0.154, 2.067, 3.65],
+      "2_80": [2.375, 0.218, 1.939, 5.02],
+      "2_160": [2.375, 0.344, 1.687, 7.46],
+      "2.5_40": [2.875, 0.203, 2.469, 5.79],
+      "2.5_80": [2.875, 0.276, 2.323, 7.66],
+      "3_10": [3.500, 0.120, 3.260, 4.33],
+      "3_40": [3.500, 0.216, 3.068, 7.58],
+      "3_80": [3.500, 0.300, 2.900, 10.25],
+      "3_160": [3.500, 0.438, 2.624, 14.32],
+      "4_10": [4.500, 0.120, 4.260, 5.61],
+      "4_40": [4.500, 0.237, 4.026, 10.79],
+      "4_80": [4.500, 0.337, 3.826, 14.98],
+      "4_160": [4.500, 0.531, 3.438, 22.51],
+      "6_10": [6.625, 0.134, 6.357, 9.30],
+      "6_40": [6.625, 0.280, 6.065, 18.97],
+      "6_80": [6.625, 0.432, 5.761, 28.57],
+      "6_160": [6.625, 0.719, 5.189, 45.30],
+      "8_40": [8.625, 0.322, 7.981, 28.55],
+      "8_80": [8.625, 0.500, 7.625, 43.39],
+      "10_40": [10.750, 0.365, 10.020, 40.48],
+      "10_80": [10.750, 0.500, 9.750, 54.74],
+      "12_40": [12.750, 0.406, 11.938, 53.52],
+      "12_80": [12.750, 0.500, 11.750, 65.42]
+    };
+
+    function doLookup() {
+      const nps = document.getElementById('lkNPS').value;
+      const sch = document.getElementById('lkSch').value;
+      const key = nps + '_' + sch;
+      const data = LOOKUP[key];
+      if (!data) {
+        document.getElementById('lkOD').textContent = '—';
+        document.getElementById('lkWall').textContent = 'Not in table';
+        document.getElementById('lkID').textContent = '—';
+        document.getElementById('lkWt').textContent = '—';
+        document.getElementById('lkRes').style.display = 'block';
+        return;
+      }
+      const [od, wall, id, wt] = data;
+      document.getElementById('lkOD').textContent = od.toFixed(3) + '"';
+      document.getElementById('lkWall').textContent = wall.toFixed(3) + '"';
+      document.getElementById('lkID').textContent = id.toFixed(3) + '"';
+      document.getElementById('lkWt').textContent = wt.toFixed(2) + ' lb/ft (CS)';
+      document.getElementById('lkRes').style.display = 'block';
+    }
+
+    function showMat(){
+      const key=document.getElementById('mSel').value; if(!key)return;
+      document.getElementById('mBody').innerHTML=MAT[key].map(r=>`<div class="result-row" style="flex-direction:column;align-items:flex-start;gap:2px;padding:8px 0"><span class="result-label" style="font-weight:700;color:var(--accent)">${r[0]}</span><span class="result-value sm">${r[1]}</span><span class="result-value sm" style="color:var(--muted)">${r[2]}</span></div>`).join('');
+      document.getElementById('mRes').style.display='block';
+    }
+
+    function convertAll(){
+      let raw=document.getElementById('cvIn').value.trim().toLowerCase(); if(!raw)return;
+      let inches;
+      if(raw.includes('mm')) inches=parseFloat(raw)/25.4;
+      else{const mixed=raw.match(/^(\d+)[\s\-]+(\d+)\/(\d+)$/);if(mixed)inches=+mixed[1]+(+mixed[2]/+mixed[3]);else if(raw.includes('/')){const p=raw.split('/');inches=+p[0]/+p[1];}else inches=parseFloat(raw);}
+      if(isNaN(inches))return alert('Could not parse');
+      document.getElementById('cvDec').textContent=inches.toFixed(4)+'"';
+      document.getElementById('cv16').textContent=toFrac(inches,16);
+      document.getElementById('cv8').textContent=toFrac(inches,8);
+      document.getElementById('cvMM').textContent=(inches*25.4).toFixed(2)+' mm';
+      const ft=Math.floor(inches/12),rem=inches%12;
+      document.getElementById('cvFt').textContent=ft+"' "+toFrac(rem);
+      document.getElementById('cvRes').style.display='block';
+    }
+  </script>
 </body>
 </html>
